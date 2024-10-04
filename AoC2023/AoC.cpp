@@ -40,7 +40,8 @@ int aoc2023::dayFour(std::string day_four_file) {
 	std::ifstream input_file(day_four_file);
 	std::string current_line;
 
-	int points_sum{};
+	std::vector<int> scratcher_matches;
+	std::vector<int> scratcher_count;
 	while (std::getline(input_file, current_line)) {
 		// Grab the section with winning numbers
 		auto winning_start = current_line.find_first_of(':') + 1;
@@ -59,12 +60,23 @@ int aoc2023::dayFour(std::string day_four_file) {
 			}
 		}
 
-		if (matches != 0) {
-			points_sum += std::pow(2, matches - 1);
+		scratcher_matches.push_back(matches);
+		scratcher_count.push_back(1);
+	}
+
+	// Process each match according to new rules
+	int instances_sum{};
+	for (size_t i = 0; i < scratcher_count.size(); i++) {
+		int current_matches = scratcher_matches.at(i);
+		int current_copies = scratcher_count.at(i);
+		instances_sum += current_copies;
+
+		for (size_t j = 1; j <= current_matches; j++) {
+			scratcher_count[i + j] += current_copies;
 		}
 	}
 
-	return points_sum;
+	return instances_sum;
 }
 
 ///////////////////////////////////////////////////
