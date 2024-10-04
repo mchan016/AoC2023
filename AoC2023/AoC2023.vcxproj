@@ -137,6 +137,9 @@
     <Text Include="aoc2023_day1_input.txt" />
     <Text Include="tester1.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include=".gitignore" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
