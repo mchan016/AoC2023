@@ -1,5 +1,6 @@
 #include "AoC.h"
 
+#include <cmath>
 #include <fstream>
 #include <string>
 #include <cctype>
@@ -10,6 +11,61 @@
 
 #include <iostream>
 
+
+///////////////////////////////////////////////////
+//  DAY FOUR
+///////////////////////////////////////////////////
+
+std::vector<int> numberLineToVector(std::string nums_line) {
+	nums_line += ' ';
+	std::vector<int> nums;
+	int current_num{};
+	for (auto character : nums_line) {
+		if (std::isdigit(character)) {
+			current_num *= 10;
+			current_num += character - '0';
+		}
+		else {
+			if (current_num != 0) {
+				nums.push_back(current_num);
+				current_num = 0;
+			}
+		}
+	}
+
+	return nums;
+}
+
+int aoc2023::dayFour(std::string day_four_file) {
+	std::ifstream input_file(day_four_file);
+	std::string current_line;
+
+	int points_sum{};
+	while (std::getline(input_file, current_line)) {
+		// Grab the section with winning numbers
+		auto winning_start = current_line.find_first_of(':') + 1;
+		auto winning_end = current_line.find_first_of('|');
+		std::string winning_nums_line = current_line.substr(winning_start, winning_end - winning_start);
+		std::vector<int> winning_nums_vector{ numberLineToVector(winning_nums_line) };
+		std::unordered_set<int> winning_nums{ winning_nums_vector.begin(), winning_nums_vector.end() };
+		
+		// Grabe the section with scratcher numbers
+		std::string scratcher_nums_line = current_line.substr(winning_end + 1);
+		std::vector<int> scratcher_nums{ numberLineToVector(scratcher_nums_line) };
+		int matches{ 0 };
+		for (const auto& num : scratcher_nums) {
+			if (winning_nums.count(num) > 0) {
+				++matches;
+			}
+		}
+
+		if (matches != 0) {
+			points_sum += std::pow(2, matches - 1);
+		}
+	}
+
+	return points_sum;
+}
 
 ///////////////////////////////////////////////////
 //  DAY THREE
