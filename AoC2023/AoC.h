@@ -7,6 +7,7 @@ namespace aoc2023 {
 
 	int dayOne(std::string day_one_file);
 	int dayTwo(std::string day_two_file);
+	int dayThree(std::string day_three_file);
 
 }
 

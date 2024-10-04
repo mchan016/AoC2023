@@ -6,8 +6,88 @@
 #include <limits>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 
 #include <iostream>
+
+
+///////////////////////////////////////////////////
+//  DAY THREE
+///////////////////////////////////////////////////
+
+int aoc2023::dayThree(std::string day_three_file) {
+	std::ifstream input_file(day_three_file);
+	std::string current_line;
+	std::vector<int> numbers;
+	int numbers_position{};
+	int current_number{};
+	std::vector<std::vector<std::string>> schematic;
+
+	while (std::getline(input_file, current_line)) {
+		// Stuff numbers into the numbers vector and keep references into the schematic
+		std::vector<std::string> schema_line{};
+		for (size_t i = 0; i < current_line.length(); i++) {
+			char character = current_line[i];
+			if (!std::isdigit(character)) {
+				if (current_number != 0) {
+					numbers.push_back(current_number);
+					current_number = 0;
+					++numbers_position;
+				}
+
+				schema_line.push_back(std::string{ character });
+			}
+			else {
+				current_number *= 10;
+				current_number += character - '0';
+				schema_line.push_back(std::to_string(numbers_position));
+			}
+		}
+
+		schematic.push_back(schema_line);
+	}
+
+	// Explore the map and get all numbers that are adjacent to a symbol
+	// make sure don't double count
+	std::unordered_set<std::string> accounted_positions;
+	int sum_near_symbols{};
+	for (int i = 0; i < static_cast<int>(schematic.size()); i++) {
+		const auto& line = schematic.at(i);
+		for (int j = 0; j < static_cast<int>(line.size()); j++) {
+			char character = line.at(j).at(0);
+			if (!std::isdigit(character) && character != '.') {
+				// Check all neighbors of symbol to see if number is nearby
+				for (int row_displace = -1; row_displace <= 1; row_displace++) {
+					for (int col_displace = -1; col_displace <= 1; col_displace++) {
+						int row = i + row_displace;
+						int col = j + col_displace;
+
+						// Check if out of bounds or is not a digit
+						if (row < 0 || row >= schematic.size() || col < 0 || col >= schematic.at(0).size() || !std::isdigit(schematic[row][col].at(0))) {
+							continue;
+						}
+
+						// Check if already encountered this number before
+						if (accounted_positions.count(schematic[row][col]) > 0) {
+							continue;
+						}
+
+						// Otherwise add to sum and account for number
+						accounted_positions.insert(schematic[row][col]);
+						int position = std::stoi(schematic[row][col]);
+						sum_near_symbols += numbers[position];
+					}
+				}
+			}
+		}
+	}
+
+	return sum_near_symbols;
+}
+
+///////////////////////////////////////////////////
+//  DAY TWO
+///////////////////////////////////////////////////
 
 int aoc2023::dayTwo(std::string day_two_file) {
 	std::ifstream input_file(day_two_file);
@@ -56,6 +136,10 @@ int aoc2023::dayTwo(std::string day_two_file) {
 
 	return games_power_sum;
 }
+
+///////////////////////////////////////////////////
+//  DAY ONE
+///////////////////////////////////////////////////
 
 int aoc2023::dayOne(std::string day_one_file) {
 	std::ifstream input_file(day_one_file);
