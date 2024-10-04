@@ -12,20 +12,18 @@
 int aoc2023::dayTwo(std::string day_two_file) {
 	std::ifstream input_file(day_two_file);
 	std::string current_line;
-	int games_sum{};
-	int game_num{};
-	std::unordered_map<char, int> bag_limits{
-		{'r', 12}, {'g', 13}, {'b', 14}
-	};
+	int games_power_sum{};
 
 	while (std::getline(input_file, current_line)) {
-		game_num += 1;
-
 		// Get the current game's rounds
-		bool is_good_game = true;
 		auto separator = current_line.find_first_of(':');
 		std::string game_rounds = current_line.substr(separator+1);
-		
+		std::unordered_map<char, int> largest_data{
+			{'r', std::numeric_limits<int>::min()},
+			{'g', std::numeric_limits<int>::min()},
+			{'b', std::numeric_limits<int>::min()},
+		};
+
 		// Iterate through all rounds trying to find a datapoint that exceeds the limits
 		for (size_t i = 0; i < game_rounds.length(); i++) {
 			if (std::isdigit(game_rounds[i])) {
@@ -36,22 +34,27 @@ int aoc2023::dayTwo(std::string day_two_file) {
 				}
 				char color = game_rounds[++i];
 
-				// Check if datapoint exceeds limits
-				if (bag_limits[color] < current_num) {
-					is_good_game = false;
-					break;
+				// Check if color is smaller than current smallest data
+				if (largest_data[color] == std::numeric_limits<int>::min() || largest_data[color] < current_num) {
+					largest_data[color] = current_num;
 				}
 			}
 		}
 
 		// No datapoints exceeded limits, add current round to game sum
-		if (is_good_game) {
-			games_sum += game_num;
+		int power{ 1 };
+		for (const auto& data_point : largest_data) {
+			int number = data_point.second;
+			if (number != std::numeric_limits<int>::min()) {
+				power *= number;
+			}
 		}
+
+		games_power_sum += power;
 	}
 
 
-	return games_sum;
+	return games_power_sum;
 }
 
 int aoc2023::dayOne(std::string day_one_file) {
