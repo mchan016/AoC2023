@@ -49,14 +49,15 @@ int aoc2023::dayThree(std::string day_three_file) {
 
 	// Explore the map and get all numbers that are adjacent to a symbol
 	// make sure don't double count
-	std::unordered_set<std::string> accounted_positions;
-	int sum_near_symbols{};
+	int gear_ratio_sum{};
 	for (int i = 0; i < static_cast<int>(schematic.size()); i++) {
 		const auto& line = schematic.at(i);
 		for (int j = 0; j < static_cast<int>(line.size()); j++) {
 			char character = line.at(j).at(0);
-			if (!std::isdigit(character) && character != '.') {
-				// Check all neighbors of symbol to see if number is nearby
+			if (!std::isdigit(character) && character == '*') {
+				std::vector<int> nums_adjacent;
+				std::unordered_set<int> seen_positions;
+				// Check all neighboring numbers
 				for (int row_displace = -1; row_displace <= 1; row_displace++) {
 					for (int col_displace = -1; col_displace <= 1; col_displace++) {
 						int row = i + row_displace;
@@ -67,22 +68,25 @@ int aoc2023::dayThree(std::string day_three_file) {
 							continue;
 						}
 
-						// Check if already encountered this number before
-						if (accounted_positions.count(schematic[row][col]) > 0) {
+						// Otherwise add to sum and account for number
+						int position = std::stoi(schematic[row][col]);
+						if (seen_positions.count(position) > 0) {
 							continue;
 						}
-
-						// Otherwise add to sum and account for number
-						accounted_positions.insert(schematic[row][col]);
-						int position = std::stoi(schematic[row][col]);
-						sum_near_symbols += numbers[position];
+						seen_positions.insert(position);
+						nums_adjacent.push_back(numbers[position]);
 					}
+				}
+
+				// Only add to gear ratio if it's a gear
+				if (nums_adjacent.size() == 2) {
+					gear_ratio_sum += nums_adjacent.at(0) * nums_adjacent.at(1);
 				}
 			}
 		}
 	}
 
-	return sum_near_symbols;
+	return gear_ratio_sum;
 }
 
 ///////////////////////////////////////////////////
