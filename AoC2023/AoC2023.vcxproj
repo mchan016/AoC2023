@@ -134,11 +134,8 @@
     <ClInclude Include="AoC.h" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="aoc2023_day1_input.txt" />
-    <Text Include="tester1.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include=".gitignore" />
+    <Text Include="input.txt" />
+    <Text Include="tester.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

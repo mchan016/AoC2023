@@ -7,6 +7,53 @@
 #include <vector>
 #include <unordered_map>
 
+#include <iostream>
+
+int aoc2023::dayTwo(std::string day_two_file) {
+	std::ifstream input_file(day_two_file);
+	std::string current_line;
+	int games_sum{};
+	int game_num{};
+	std::unordered_map<char, int> bag_limits{
+		{'r', 12}, {'g', 13}, {'b', 14}
+	};
+
+	while (std::getline(input_file, current_line)) {
+		game_num += 1;
+
+		// Get the current game's rounds
+		bool is_good_game = true;
+		auto separator = current_line.find_first_of(':');
+		std::string game_rounds = current_line.substr(separator+1);
+		
+		// Iterate through all rounds trying to find a datapoint that exceeds the limits
+		for (size_t i = 0; i < game_rounds.length(); i++) {
+			if (std::isdigit(game_rounds[i])) {
+				int current_num = 0;
+				while (std::isdigit(game_rounds[i])) {
+					current_num *= 10;
+					current_num += (game_rounds[i++] - '0');
+				}
+				char color = game_rounds[++i];
+
+				// Check if datapoint exceeds limits
+				if (bag_limits[color] < current_num) {
+					is_good_game = false;
+					break;
+				}
+			}
+		}
+
+		// No datapoints exceeded limits, add current round to game sum
+		if (is_good_game) {
+			games_sum += game_num;
+		}
+	}
+
+
+	return games_sum;
+}
+
 int aoc2023::dayOne(std::string day_one_file) {
 	std::ifstream input_file(day_one_file);
 	std::string current_line;

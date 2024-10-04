@@ -28,10 +28,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="tester1.txt" />
-    <Text Include="aoc2023_day1_input.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include=".gitignore" />
+    <Text Include="tester.txt" />
+    <Text Include="input.txt" />
   </ItemGroup>
 </Project>
