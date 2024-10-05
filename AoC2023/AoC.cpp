@@ -41,6 +41,91 @@ std::vector<T> numberLineToVector(std::string nums_line) {
 }
 
 ///////////////////////////////////////////////////
+//  DAY SIX
+///////////////////////////////////////////////////
+
+int calcDistanceTravelled(int seconds_held, int total_seconds) {
+	return seconds_held * (total_seconds - seconds_held);
+}
+
+//int raceSearch(int start, int end, int record_distance, bool find_lower) {
+//	int total_seconds = end;
+//
+//	while (start <= end) {
+//		int seconds_held = (start + end) / 2;
+//		int distance_travelled = calcDistanceTravelled(seconds_held, total_seconds);
+//		int distance_travelled_before = calcDistanceTravelled(seconds_held - 1, total_seconds);
+//		int distance_travelled_after = calcDistanceTravelled(seconds_held + 1, total_seconds);
+//		if (distance_travelled < record_distance) {
+//			// We need to determine where is the curve, this might be a bit difficult
+//			// If we are past the curve, then to increase we need to go back
+//			if (distance_travelled_before > distance_travelled) {
+//				end = seconds_held - 1;
+//			}
+//			// If we are before the curve, then to increase we need to go forward
+//			else {
+//				start = seconds_held + 1;
+//			}
+//		}
+//		else if (distance_travelled >= record_distance) {
+//			// This means we're right in the range
+//			if ((find_lower && distance_travelled_before < record_distance)
+//				|| (!find_lower && distance_travelled_after < record_distance)) {
+//				return seconds_held;
+//			}
+//			else if (find_lower) {
+//				end = seconds_held - 1;
+//			}
+//			else {
+//				start = seconds_held + 1;
+//			}
+//		}
+//	}
+//
+//	return 0;
+//}
+
+int aoc2023::daySix(std::string day_six_file) {
+	std::ifstream input_file(day_six_file);
+	std::string current_line;
+
+	std::vector<int> times{};
+	std::vector<int> record_distances{};
+	while (std::getline(input_file, current_line)) {
+		if (current_line.find("Time") != std::string::npos) {
+			std::string times_line = current_line.substr(current_line.find_first_of(':') + 1);
+			times = numberLineToVector<int>(times_line);
+		}
+		else if (current_line.find("Distance") != std::string::npos) {
+			std::string distances_line = current_line.substr(current_line.find_first_of(':') + 1);
+			record_distances = numberLineToVector<int>(distances_line);
+		}
+	}
+
+	/*
+		For each race we need to use binary search to get the range of possible values:
+		- Formula for each valuation:
+			# of seconds held x (time - # of seconds held) > record_distance
+	*/
+	int result{1};
+	for (size_t i = 0; i < times.size(); i++) {
+		int current_time = times.at(i);
+		int current_record_distance = record_distances.at(i);
+		int possible_times{};
+
+		for (size_t j = 0; j < current_time; j++) {
+			if (calcDistanceTravelled(j, current_time) > current_record_distance) {
+				++possible_times;
+			}
+		}
+
+		result *= possible_times;
+	}
+
+	return result;
+}
+
+///////////////////////////////////////////////////
 //  DAY FIVE
 ///////////////////////////////////////////////////
 
