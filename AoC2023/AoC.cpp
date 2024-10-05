@@ -44,18 +44,20 @@ std::vector<T> numberLineToVector(std::string nums_line) {
 //  DAY SIX
 ///////////////////////////////////////////////////
 
-int calcDistanceTravelled(int seconds_held, int total_seconds) {
+template <typename T>
+T calcDistanceTravelled(T seconds_held, T total_seconds) {
 	return seconds_held * (total_seconds - seconds_held);
 }
 
-int raceSearch(int start, int end, int record_distance, bool find_lower) {
-	int total_seconds = end;
+template <typename T>
+T raceSearch(T start, T end, T record_distance, bool find_lower) {
+	T total_seconds = end;
 
 	while (start <= end) {
-		int seconds_held = (start + end) / 2;
-		int distance_travelled = calcDistanceTravelled(seconds_held, total_seconds);
-		int distance_travelled_before = calcDistanceTravelled(seconds_held - 1, total_seconds);
-		int distance_travelled_after = calcDistanceTravelled(seconds_held + 1, total_seconds);
+		T seconds_held = start + ((end - start) / 2);
+		T distance_travelled = calcDistanceTravelled<T>(seconds_held, total_seconds);
+		T distance_travelled_before = calcDistanceTravelled<T>(seconds_held - 1, total_seconds);
+		T distance_travelled_after = calcDistanceTravelled<T>(seconds_held + 1, total_seconds);
 		if (distance_travelled < record_distance) {
 			// We need to determine where is the curve, this might be a bit difficult
 			// If we are past the curve, then to increase we need to go back
@@ -89,16 +91,16 @@ int aoc2023::daySix(std::string day_six_file) {
 	std::ifstream input_file(day_six_file);
 	std::string current_line;
 
-	std::vector<int> times{};
-	std::vector<int> record_distances{};
+	std::vector<size_t> times{};
+	std::vector<size_t> record_distances{};
 	while (std::getline(input_file, current_line)) {
 		if (current_line.find("Time") != std::string::npos) {
 			std::string times_line = current_line.substr(current_line.find_first_of(':') + 1);
-			times = numberLineToVector<int>(times_line);
+			times = numberLineToVector<size_t>(times_line);
 		}
 		else if (current_line.find("Distance") != std::string::npos) {
 			std::string distances_line = current_line.substr(current_line.find_first_of(':') + 1);
-			record_distances = numberLineToVector<int>(distances_line);
+			record_distances = numberLineToVector<size_t>(distances_line);
 		}
 	}
 
@@ -109,11 +111,11 @@ int aoc2023::daySix(std::string day_six_file) {
 	*/
 	int result{1};
 	for (size_t i = 0; i < times.size(); i++) {
-		int current_time = times.at(i);
-		int current_record_distance = record_distances.at(i);
+		size_t current_time = times.at(i);
+		size_t current_record_distance = record_distances.at(i);
 
-		int lower_bound = raceSearch(0, current_time, current_record_distance, true);
-		int upper_bound = raceSearch(0, current_time, current_record_distance, false);
+		size_t lower_bound = raceSearch<size_t>(1, current_time, current_record_distance, true);
+		size_t upper_bound = raceSearch<size_t>(1, current_time, current_record_distance, false);
 
 		result *= (upper_bound - lower_bound + 1);
 	}
