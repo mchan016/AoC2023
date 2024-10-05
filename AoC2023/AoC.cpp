@@ -48,42 +48,42 @@ int calcDistanceTravelled(int seconds_held, int total_seconds) {
 	return seconds_held * (total_seconds - seconds_held);
 }
 
-//int raceSearch(int start, int end, int record_distance, bool find_lower) {
-//	int total_seconds = end;
-//
-//	while (start <= end) {
-//		int seconds_held = (start + end) / 2;
-//		int distance_travelled = calcDistanceTravelled(seconds_held, total_seconds);
-//		int distance_travelled_before = calcDistanceTravelled(seconds_held - 1, total_seconds);
-//		int distance_travelled_after = calcDistanceTravelled(seconds_held + 1, total_seconds);
-//		if (distance_travelled < record_distance) {
-//			// We need to determine where is the curve, this might be a bit difficult
-//			// If we are past the curve, then to increase we need to go back
-//			if (distance_travelled_before > distance_travelled) {
-//				end = seconds_held - 1;
-//			}
-//			// If we are before the curve, then to increase we need to go forward
-//			else {
-//				start = seconds_held + 1;
-//			}
-//		}
-//		else if (distance_travelled >= record_distance) {
-//			// This means we're right in the range
-//			if ((find_lower && distance_travelled_before < record_distance)
-//				|| (!find_lower && distance_travelled_after < record_distance)) {
-//				return seconds_held;
-//			}
-//			else if (find_lower) {
-//				end = seconds_held - 1;
-//			}
-//			else {
-//				start = seconds_held + 1;
-//			}
-//		}
-//	}
-//
-//	return 0;
-//}
+int raceSearch(int start, int end, int record_distance, bool find_lower) {
+	int total_seconds = end;
+
+	while (start <= end) {
+		int seconds_held = (start + end) / 2;
+		int distance_travelled = calcDistanceTravelled(seconds_held, total_seconds);
+		int distance_travelled_before = calcDistanceTravelled(seconds_held - 1, total_seconds);
+		int distance_travelled_after = calcDistanceTravelled(seconds_held + 1, total_seconds);
+		if (distance_travelled < record_distance) {
+			// We need to determine where is the curve, this might be a bit difficult
+			// If we are past the curve, then to increase we need to go back
+			if (distance_travelled_before > distance_travelled) {
+				end = seconds_held - 1;
+			}
+			// If we are before the curve, then to increase we need to go forward
+			else {
+				start = seconds_held + 1;
+			}
+		}
+		else if (distance_travelled >= record_distance) {
+			// This means we're right in the range
+			if ((find_lower && distance_travelled_before <= record_distance)
+				|| (!find_lower && distance_travelled_after <= record_distance)) {
+				return seconds_held;
+			}
+			else if (find_lower) {
+				end = seconds_held - 1;
+			}
+			else {
+				start = seconds_held + 1;
+			}
+		}
+	}
+
+	return 0;
+}
 
 int aoc2023::daySix(std::string day_six_file) {
 	std::ifstream input_file(day_six_file);
@@ -111,15 +111,11 @@ int aoc2023::daySix(std::string day_six_file) {
 	for (size_t i = 0; i < times.size(); i++) {
 		int current_time = times.at(i);
 		int current_record_distance = record_distances.at(i);
-		int possible_times{};
 
-		for (size_t j = 0; j < current_time; j++) {
-			if (calcDistanceTravelled(j, current_time) > current_record_distance) {
-				++possible_times;
-			}
-		}
+		int lower_bound = raceSearch(0, current_time, current_record_distance, true);
+		int upper_bound = raceSearch(0, current_time, current_record_distance, false);
 
-		result *= possible_times;
+		result *= (upper_bound - lower_bound + 1);
 	}
 
 	return result;
