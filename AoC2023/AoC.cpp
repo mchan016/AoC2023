@@ -13,28 +13,130 @@
 
 
 ///////////////////////////////////////////////////
-//  DAY FOUR
+//  GENERAL UTILITY FUNCTIONS
 ///////////////////////////////////////////////////
 
-std::vector<int> numberLineToVector(std::string nums_line) {
+template <typename T>
+std::vector<T> numberLineToVector(std::string nums_line) {
 	nums_line += ' ';
-	std::vector<int> nums;
-	int current_num{};
+	std::vector<T> nums;
+	T current_num{std::numeric_limits<T>::min()};
 	for (auto character : nums_line) {
 		if (std::isdigit(character)) {
+			if (current_num == std::numeric_limits<T>::min()) {
+				current_num = 0;
+			}
 			current_num *= 10;
 			current_num += character - '0';
 		}
 		else {
-			if (current_num != 0) {
+			if (current_num != std::numeric_limits<T>::min()) {
 				nums.push_back(current_num);
-				current_num = 0;
+				current_num = std::numeric_limits<T>::min();
 			}
 		}
 	}
 
 	return nums;
 }
+
+///////////////////////////////////////////////////
+//  DAY FIVE
+///////////////////////////////////////////////////
+
+int aoc2023::dayFive(std::string day_five_file) {
+	std::ifstream input_file(day_five_file);
+	std::string current_line;
+	struct almanac_point {
+	private:
+		long long _dest;
+		long long _src;
+		long long _range;
+
+	public:
+		almanac_point(long long dest, long long src, long long range) 
+			: _dest{dest}, _src{src}, _range{range}
+		{}
+
+		bool is_in_range(long long candidate) {
+			if (candidate >= _src && candidate < (_src + _range)) {
+				return true;
+			}
+
+			return false;
+		}
+
+		long long get_destination(long long candidate) {
+			long long diff = candidate - _src;
+
+			return _dest + diff;
+		}
+	};
+
+	// Get all inputs
+	std::vector<long long> seeds;
+	std::string current_conversion{""};
+	std::unordered_map<std::string, std::vector<almanac_point*>> data;
+	while (std::getline(input_file, current_line)) {
+		if (current_line.find("seeds") != std::string::npos) {
+			auto seeds_line = current_line.substr(current_line.find(':') + 1);
+			seeds = numberLineToVector<long long>(seeds_line);
+		}
+		else if (current_line.empty()) {
+			if (!current_conversion.empty()) {
+				current_conversion = "";
+			}
+		}
+		else if (current_line.find("map") != std::string::npos) {
+			current_conversion = current_line.substr(0, current_line.find("map") - 1);
+		}
+		else {
+			// Add data points to current almanac conversion
+			std::vector<long long> nums = numberLineToVector<long long>(current_line);
+			data[current_conversion].push_back(new almanac_point{ nums.at(0), nums.at(1), nums.at(2) });
+		}
+	}
+
+	std::vector<std::string> pipeline{
+		"seed-to-soil",
+		"soil-to-fertilizer",
+		"fertilizer-to-water",
+		"water-to-light",
+		"light-to-temperature",
+		"temperature-to-humidity",
+		"humidity-to-location"
+	};
+	long long current_closest_location{ std::numeric_limits<long long>::max() };
+	for (const auto& seed : seeds) {
+		auto source = seed;
+		long long destination = std::numeric_limits<long long>::min();
+		for (const auto& pipeline_point : pipeline) {
+			std::vector<almanac_point*>& translation_data = data.at(pipeline_point);
+
+			for (auto* point : translation_data) {
+				if (point->is_in_range(source)) {
+					destination = point->get_destination(source);
+					break;
+				}
+			}
+
+			source = (destination == std::numeric_limits<long long>::min()) ? source : destination;
+			destination = std::numeric_limits<long long>::min();
+		}
+
+		// Check if location is closer than current closest location
+		if (source < current_closest_location) {
+			current_closest_location = source;
+		}
+	}
+	
+
+	return current_closest_location;
+}
+
+///////////////////////////////////////////////////
+//  DAY FOUR
+///////////////////////////////////////////////////
 
 int aoc2023::dayFour(std::string day_four_file) {
 	std::ifstream input_file(day_four_file);
@@ -47,12 +149,12 @@ int aoc2023::dayFour(std::string day_four_file) {
 		auto winning_start = current_line.find_first_of(':') + 1;
 		auto winning_end = current_line.find_first_of('|');
 		std::string winning_nums_line = current_line.substr(winning_start, winning_end - winning_start);
-		std::vector<int> winning_nums_vector{ numberLineToVector(winning_nums_line) };
+		std::vector<int> winning_nums_vector{ numberLineToVector<int>(winning_nums_line) };
 		std::unordered_set<int> winning_nums{ winning_nums_vector.begin(), winning_nums_vector.end() };
 		
 		// Grabe the section with scratcher numbers
 		std::string scratcher_nums_line = current_line.substr(winning_end + 1);
-		std::vector<int> scratcher_nums{ numberLineToVector(scratcher_nums_line) };
+		std::vector<int> scratcher_nums{ numberLineToVector<int>(scratcher_nums_line) };
 		int matches{ 0 };
 		for (const auto& num : scratcher_nums) {
 			if (winning_nums.count(num) > 0) {
@@ -216,7 +318,7 @@ int aoc2023::dayTwo(std::string day_two_file) {
 int aoc2023::dayOne(std::string day_one_file) {
 	std::ifstream input_file(day_one_file);
 	std::string current_line;
-	long sum{};
+	long long sum{};
 	std::unordered_map<std::string, int> numbers{
 		{"one", 1}, {"two", 2}, {"three", 3}, {"four", 4},
 		{"five", 5}, {"six", 6}, {"seven", 7}, {"eight", 8}, {"nine", 9}
