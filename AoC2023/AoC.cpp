@@ -73,14 +73,39 @@ int aoc2023::dayFive(std::string day_five_file) {
 		}
 	};
 
+	struct seed_points {
+	private:
+		long long _start;
+		long long _range;
+		std::vector<long long>* _result{nullptr};
+
+	public:
+		seed_points(long long start, long long range)
+			: _start{ start }, _range{ range }, _result{new std::vector<long long>} {
+			for (long long i = _start; i < _start + _range; i++) {
+				_result->push_back(i);
+			}
+		}
+
+		std::vector<long long>* get_all_seeds() {
+			return _result;
+		}
+	};
+
 	// Get all inputs
-	std::vector<long long> seeds;
+	std::vector<seed_points> seeds;
 	std::string current_conversion{""};
 	std::unordered_map<std::string, std::vector<almanac_point*>> data;
 	while (std::getline(input_file, current_line)) {
 		if (current_line.find("seeds") != std::string::npos) {
 			auto seeds_line = current_line.substr(current_line.find(':') + 1);
-			seeds = numberLineToVector<long long>(seeds_line);
+			auto seeds_data = numberLineToVector<long long>(seeds_line);
+
+			// Populate seeds
+			for (size_t i = 0; i < seeds_data.size(); i += 2) {
+				seed_points current_point{ seeds_data.at(i), seeds_data.at(i + 1) };
+				seeds.push_back(current_point);
+			}
 		}
 		else if (current_line.empty()) {
 			if (!current_conversion.empty()) {
@@ -107,26 +132,28 @@ int aoc2023::dayFive(std::string day_five_file) {
 		"humidity-to-location"
 	};
 	long long current_closest_location{ std::numeric_limits<long long>::max() };
-	for (const auto& seed : seeds) {
-		auto source = seed;
-		long long destination = std::numeric_limits<long long>::min();
-		for (const auto& pipeline_point : pipeline) {
-			std::vector<almanac_point*>& translation_data = data.at(pipeline_point);
+	for (auto& seed_pt : seeds) {
+		for (const auto& seed : *(seed_pt.get_all_seeds())) {
+			auto source = seed;
+			long long destination = std::numeric_limits<long long>::min();
+			for (const auto& pipeline_point : pipeline) {
+				std::vector<almanac_point*>& translation_data = data.at(pipeline_point);
 
-			for (auto* point : translation_data) {
-				if (point->is_in_range(source)) {
-					destination = point->get_destination(source);
-					break;
+				for (auto* point : translation_data) {
+					if (point->is_in_range(source)) {
+						destination = point->get_destination(source);
+						break;
+					}
 				}
+
+				source = (destination == std::numeric_limits<long long>::min()) ? source : destination;
+				destination = std::numeric_limits<long long>::min();
 			}
 
-			source = (destination == std::numeric_limits<long long>::min()) ? source : destination;
-			destination = std::numeric_limits<long long>::min();
-		}
-
-		// Check if location is closer than current closest location
-		if (source < current_closest_location) {
-			current_closest_location = source;
+			// Check if location is closer than current closest location
+			if (source < current_closest_location) {
+				current_closest_location = source;
+			}
 		}
 	}
 	
